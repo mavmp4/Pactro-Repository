@@ -11,9 +11,22 @@ public class Player : MonoBehaviour
 
     private float startingScale;
 
+    private Node currentNode;
+
     // Start is called before the first frame update
     void Start()
     {
+        Node node = GetNodeAtPosition(transform.localPosition);
+
+        if (node != null)
+        {
+            currentNode = node;
+            Debug.Log("Player node found: " + node.name);
+        }
+        else
+        {
+            Debug.LogError("NO NODE FOUND FOR PLAYER");
+        }
         startingScale = transform.localScale.x;
     }
 
@@ -74,5 +87,17 @@ public class Player : MonoBehaviour
             transform.localScale = new Vector3(startingScale, startingScale, startingScale);
             transform.localRotation = Quaternion.Euler(0, 0, 270);
         }
+    }
+
+    Node GetNodeAtPosition(Vector2 pos)
+    {
+        GameObject tile = GameObject.Find("Game").GetComponent<GameBoard>().board[(int)pos.x, (int)pos.y];
+
+        if (tile != null)
+        {
+            return tile.GetComponent<Node>();
+        }
+
+        return null;
     }
 }
