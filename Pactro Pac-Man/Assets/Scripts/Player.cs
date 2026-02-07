@@ -8,10 +8,11 @@ public class Player : MonoBehaviour
     public float speed = 4.0f;
 
     private Vector2 direction = Vector2.zero;
+    private Vector2 nextDirection;
 
     private float startingScale;
 
-    private Node currentNode;
+    private Node currentNode, previousNode, targetNode;
 
     // Start is called before the first frame update
     void Start()
@@ -28,25 +29,42 @@ public class Player : MonoBehaviour
             Debug.LogError("NO NODE FOUND FOR PLAYER");
         }
         startingScale = transform.localScale.x;
+        direction = Vector2.left;
+        ChangePosition(direction);
+    }
+
+    Node CanMove (Vector2 d)
+    {
+        Node moveToNode = null;
+        for (int i = 0; i < currentNode.neighbors.Length; i++)
+        {
+            if(currentNode.validDirections[i] == d)
+            {
+                moveToNode = currentNode.neighbors[i];
+                break;
+            }
+        }
+
+        return moveToNode;
     }
 
     private void CheckInput()
     {
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            direction = Vector2.left;
+            ChangePosition(Vector2.left);
         }
         else if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            direction = Vector2.right;
+            ChangePosition(Vector2.right);
         }
         else if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            direction = Vector2.up;
+            ChangePosition(Vector2.up);
         }
         else if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            direction = Vector2.down;
+            ChangePosition(Vector2.down);
         }
     }
 
@@ -57,14 +75,79 @@ public class Player : MonoBehaviour
 
         Move();
 
-        Rotate();
+        //Rotate();
+    }
+
+    void ChangePosition(Vector2 d)
+    {
+        if(d != direction)
+        {
+            nextDirection = d;
+        }
+
+        if(currentNode != null)
+        {
+            Node moveToNode = CanMove(d);
+
+            if(moveToNode != null)
+            {
+                direction = d;
+                targetNode = moveToNode;
+                previousNode = currentNode;
+                currentNode = null;
+            }
+        }
     }
 
     private void Move()
     {
-        transform.localPosition += (Vector3)(direction * speed) * Time.deltaTime;
+        if(targetNode != currentNode && targetNode != null)
+        {
+            if(OverShotTarget())
+            {
+                currentNode = targetNode;
+                transform.localPosition = currentNode.transform.position;
+
+                Node moveToNode = CanMove(nextDirection);
+
+                if(moveToNode != null)
+                {
+                    direction = nextDirection;
+                }
+
+                if(moveToNode == null)
+                {
+                    moveToNode = CanMove(direction);
+                }
+
+                if (moveToNode != null)
+                {
+                    targetNode = moveToNode;
+                    previousNode = currentNode;
+                    currentNode = null;
+                } else
+                {
+                    direction = Vector2.zero;
+                }
+            } else
+            {
+                transform.localPosition += (Vector3)(direction * speed) * Time.deltaTime;
+            }
+        }
+        
     }
 
+    void MoveToNode(Vector2 d)
+    {
+        Node moveToNode = CanMove(d);
+
+        if(moveToNode != null)
+        {
+            transform.localPosition = moveToNode.transform.position;
+            currentNode = moveToNode;
+        }
+    }
+    /*
     private void Rotate()
     {
         if(direction == Vector2.left)
@@ -88,7 +171,7 @@ public class Player : MonoBehaviour
             transform.localRotation = Quaternion.Euler(0, 0, 270);
         }
     }
-
+    */
     Node GetNodeAtPosition(Vector2 pos)
     {
         GameObject tile = GameObject.Find("Game").GetComponent<GameBoard>().board[(int)pos.x, (int)pos.y];
@@ -99,5 +182,19 @@ public class Player : MonoBehaviour
         }
 
         return null;
+    }
+
+    bool OverShotTarget ()
+    {
+        float nodeToTarget = LengthFromPreviousNode(targetNode.transform.position);
+        float nodeToSelf = LengthFromPreviousNode(transform.localPosition);
+
+        return nodeToSelf > nodeToTarget;
+    }
+
+    float LengthFromPreviousNode (Vector2 targetPosition)
+    {
+        Vector2 length = targetPosition - (Vector2)previousNode.transform.position;
+        return length.sqrMagnitude;
     }
 }

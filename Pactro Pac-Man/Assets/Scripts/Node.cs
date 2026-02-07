@@ -5,7 +5,7 @@ using UnityEngine;
 public class Node : MonoBehaviour
 {
     public Node[] neighbors;
-    private Vector2[] validDirections;
+    public Vector2[] validDirections;
     // Start is called before the first frame update
     void Start()
     {
