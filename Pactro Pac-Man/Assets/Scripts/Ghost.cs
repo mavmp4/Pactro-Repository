@@ -5,8 +5,12 @@ using UnityEngine;
 public class Ghost : MonoBehaviour
 {
     public float moveSpeed = 3.9f;
+    public float frightenedModeMoveSpeed = 1.9f;
 
     public Node startingPosition;
+    public Node homeNode;
+
+    public int frightenedModeDuration = 10;
 
     public int scatterModeTimer1 = 7;
     public int chaseModeTimer1 = 20;
@@ -18,6 +22,10 @@ public class Ghost : MonoBehaviour
 
     private int modeChangeIteration = 1;
     private float modeChangeTimer = 0;
+
+    private float frightenedModeTimer = 0;
+
+    private float previousMoveSpeed;
 
     public enum Mode
     {
@@ -151,18 +159,60 @@ public class Ghost : MonoBehaviour
         }
         else if (currentMode == Mode.Frightened)
         {
-
+            frightenedModeTimer += Time.deltaTime;
+            if (frightenedModeTimer >= frightenedModeDuration)
+            {
+                frightenedModeTimer = 0;
+                ChangeMode(previousMode);
+            }
         }
     }
 
     void ChangeMode(Mode m)
     {
+        if (currentMode == m)
+        {
+            if (currentMode == Mode.Frightened)
+            {
+                frightenedModeTimer = 0;
+            }
+            return;
+        }
+
+        if (currentMode == Mode.Frightened)
+        {
+            moveSpeed = previousMoveSpeed;
+            
+        }
+
+        if(m  == Mode.Frightened)
+        {
+            previousMoveSpeed = moveSpeed;
+            moveSpeed = frightenedModeMoveSpeed;
+        }
+        previousMode = currentMode;
         currentMode = m;
+
+
+    }
+
+    public void StartFrightenedMode()
+    {
+        Debug.Log("Ghost frightened");
+        ChangeMode(Mode.Frightened);
     }
 
     Node ChooseNextNode()
     {
-        Vector2 playerTile = new Vector2(Mathf.RoundToInt(player.transform.position.x), Mathf.RoundToInt(player.transform.position.y));
+        Vector2 targetTile = Vector2.zero;
+        if (currentMode == Mode.Chase)
+        {
+            targetTile = new Vector2(Mathf.RoundToInt(player.transform.position.x), Mathf.RoundToInt(player.transform.position.y));
+        }
+        else if(currentMode == Mode.Scatter)
+        {
+            targetTile = homeNode.transform.position;
+        }
 
         Node moveToNode = null;
         Vector2[] directions = currentNode.validDirections;
@@ -174,7 +224,7 @@ public class Ghost : MonoBehaviour
         {
             if (neighbors[i] != null && neighbors[i] != previousNode)
             {
-                float distance = GetDistance(neighbors[i].transform.position, playerTile);
+                float distance = GetDistance(neighbors[i].transform.position, targetTile);
                 if (distance < leastDistance)
                 {
                     leastDistance = distance;

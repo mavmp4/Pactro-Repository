@@ -23,7 +23,7 @@ public class GameBoard : MonoBehaviour
             Vector2 pos = node.transform.position;
             int x = Mathf.RoundToInt(pos.x);
             int y = Mathf.RoundToInt(pos.y);
-            if (x < 0 || x >= boardWidth || y < 0 || y >= boardHeight)
+            if (x < 0 || x >= boardWidth || y < 0 || y >= boardHeight || node.tag == "ghostHome")
                 continue;
             board[x, y] = node.gameObject;
         }

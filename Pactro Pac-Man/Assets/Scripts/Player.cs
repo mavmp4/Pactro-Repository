@@ -65,6 +65,16 @@ public class Player : MonoBehaviour
                     {
                         GameObject.Find("Game").GetComponent<GameBoard>().AddOneScore();
                     }
+                    else if (tile.isSuperPellet)
+                    {
+                        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
+                        foreach (GameObject go in ghosts)
+                        {
+                            go.GetComponent<Ghost>().StartFrightenedMode();
+                        }
+                    }
+
+                    
                 }
             }
         }
