@@ -48,6 +48,28 @@ public class Player : MonoBehaviour
         return moveToNode;
     }
 
+    void ConsumePellet()
+    {
+        GameObject o = GetTileAtPosition(transform.position);
+        if (o != null)
+        {
+            Tile tile = o.GetComponent<Tile>();
+
+            if (tile != null)
+            {
+                if (!tile.didConsume && (tile.isPellet || tile.isSuperPellet))
+                {
+                    o.GetComponent<SpriteRenderer>().enabled = false;
+                    tile.didConsume = true;
+                    if (tile.isPellet)
+                    {
+                        GameObject.Find("Game").GetComponent<GameBoard>().AddOneScore();
+                    }
+                }
+            }
+        }
+    }
+
     private void CheckInput()
     {
         if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
@@ -75,6 +97,7 @@ public class Player : MonoBehaviour
 
         Move();
 
+        ConsumePellet();
         //Rotate();
     }
 
@@ -97,6 +120,16 @@ public class Player : MonoBehaviour
                 currentNode = null;
             }
         }
+    }
+
+    GameObject GetTileAtPosition(Vector2 pos)
+    {
+        int x = Mathf.RoundToInt(pos.x);
+        int y = Mathf.RoundToInt(pos.y);
+
+        GameObject tile = GameObject.Find("Game").GetComponent<GameBoard>().tiles[x, y];
+
+        return tile;
     }
 
     private void Move()
