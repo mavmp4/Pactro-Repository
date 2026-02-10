@@ -45,13 +45,14 @@ public class GameBoard : MonoBehaviour
         }
     }
 
+
     public void AddOneScore()
     {
         score++;
         Debug.Log("Score: " + score);
         if (score >= pellets)
         {
-
+            PauseMenu.instance.WinGame();
             Debug.Log("Won Level");
         }
     }
@@ -60,4 +61,6 @@ public class GameBoard : MonoBehaviour
     {
 
     }
+
+    
 }

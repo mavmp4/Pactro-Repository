@@ -42,6 +42,22 @@ public class Ghost : MonoBehaviour
     private Node currentNode, targetNode, previousNode;
     private Vector2 direction, nextDirection;
 
+    void OnTriggerEnter2D(Collider2D colldier)
+    {
+        
+        GameObject hit = colldier.gameObject;
+        Debug.Log("GameObject1 collided with " + hit.name);
+        if (hit.CompareTag("Player"))
+        {
+            if (currentMode != Mode.Frightened)
+            {
+                Debug.Log("Player Died");
+                PauseMenu.instance.LoseGame();
+            }
+           
+            
+        }
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -209,7 +225,7 @@ public class Ghost : MonoBehaviour
         {
             targetTile = new Vector2(Mathf.RoundToInt(player.transform.position.x), Mathf.RoundToInt(player.transform.position.y));
         }
-        else if(currentMode == Mode.Scatter)
+        else if(currentMode == Mode.Scatter || currentMode == Mode.Frightened)
         {
             targetTile = homeNode.transform.position;
         }
