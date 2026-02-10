@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class GameBoard : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class GameBoard : MonoBehaviour
     int count = 0;
     public int score = 0;
     private int pellets;
+    public TextMeshProUGUI scoreText;
 
     public GameObject[,] board = new GameObject[boardWidth, boardHeight];
     // Start is called before the first frame update
@@ -16,6 +18,8 @@ public class GameBoard : MonoBehaviour
 
     void Start()
     {
+        UpdateScoreUI();
+        
         // Collect nodes as before
         Node[] nodes = FindObjectsOfType<Node>();
         foreach (Node node in nodes)
@@ -49,6 +53,7 @@ public class GameBoard : MonoBehaviour
     public void AddOneScore()
     {
         score++;
+        UpdateScoreUI();
         Debug.Log("Score: " + score);
         if (score >= pellets)
         {
@@ -57,9 +62,10 @@ public class GameBoard : MonoBehaviour
         }
     }
     // Update is called once per frame
-    void Update()
-    {
+    void UpdateScoreUI()
 
+    {
+        scoreText.text = "Score: " + score;
     }
 
     
